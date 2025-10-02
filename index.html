@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encuesta Educación Utopía</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .voice-recording {
+            animation: voiceRecording 1.5s ease-in-out infinite alternate;
+            background-color: #ef4444 !important;
+        }
+        @keyframes voiceRecording {
+            from { 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            to { 
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+        .auto-advance {
+            animation: autoAdvance 2s ease-in-out;
+        }
+        @keyframes autoAdvance {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(34, 197, 94, 0.2); }
+        }
+        
+        /* Mejoras para móvil */
+        .mobile-optimized {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .text-input-mobile {
+            font-size: 16px; /* Previene zoom en iOS */
+        }
+        
+        .mobile-voice-btn {
+            min-height: 50px;
+            min-width: 50px;
+            font-size: 16px;
+        }
+        
+        .mobile-voice-feedback {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            padding: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .mobile-text {
+                font-size: 1.5rem !important;
+            }
+            
+            .mobile-padding {
+                padding: 1rem !important;
+            }
+            
+            .mobile-button {
+                padding: 0.75rem 1rem !important;
+                font-size: 1rem !important;
+            }
+            
+            .mobile-voice-container {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+        
+        /* Mejoras de accesibilidad */
+        .speech-feedback {
+            transition: all 0.3s ease;
+        }
+        
+        .permission-warning {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+        }
+        
+        .option-selected {
+            animation: optionSelected 0.5s ease-in-out, pulseBorder 2s infinite;
+        }
+        
+        @keyframes optionSelected {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes pulseBorder {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            }
+            50% { 
+                box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+            }
+        }
+        
+        .auto-advance-notice {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border: 2px solid #22c55e;
+            animation: pulse 2s infinite;
+        }
+        
+        .voice-answer-processed {
+            background: linear-gradient(135deg, #dbeafe, #93c5fd);
+            border: 2px solid #3b82f6;
+            animation: pulse 2s infinite;
+        }
+        
+        /* Colores específicos para la encuesta - MEJORADOS PARA NIÑOS */
+        .utopia-primary {
+            background-color: #FF6B6B;
+        }
+        
+        .utopia-secondary {
+            background-color: #4ECDC4;
+        }
+        
+        .utopia-accent {
+            background-color: #FFD166;
+        }
+        
+        .utopia-light {
+            background-color: #06D6A0;
+        }
+        
+        .utopia-dark {
+            background-color: #118AB2;
+        }
+        
+        .utopia-purple {
+            background-color: #8B5FBF;
+        }
+        
+        .bg-utopia-gradient {
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #FFD166);
+        }
+        
+        .text-utopia-primary {
+            color: #FF6B6B;
+        }
+        
+        .text-utopia-secondary {
+            color: #4ECDC4;
+        }
+        
+        .text-utopia-accent {
+            color: #FFD166;
+        }
+        
+        .text-utopia-light {
+            color: #06D6A0;
+        }
+        
+        .text-utopia-dark {
+            color: #118AB2;
+        }
+        
+        .border-utopia-primary {
+            border-color: #FF6B6B;
+        }
+        
+        .border-utopia-secondary {
+            border-color: #4ECDC4;
+        }
+        
+        .border-utopia-accent {
+            border-color: #FFD166;
+        }
+        
+        .hover-utopia-primary:hover {
+            background-color: #FF5252;
+        }
+        
+        .hover-utopia-secondary:hover {
+            background-color: #3DBEB6;
+        }
+        
+        .hover-utopia-accent:hover {
+            background-color: #FFC145;
+        }
+        
+        /* Nuevos estilos para botones más atractivos */
+        .kid-friendly-button {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            border: 4px solid #FF5252;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .kid-friendly-button:hover {
+            background: linear-gradient(135deg, #FF5252, #FF7B42);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .kid-friendly-button-secondary {
+            background: linear-gradient(135deg, #4ECDC4, #6AE2D9);
+            border: 4px solid #3DBEB6;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .kid-friendly-button-secondary:hover {
+            background: linear-gradient(135deg, #3DBEB6, #5AD4CB);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .kid-friendly-button-accent {
+            background: linear-gradient(135deg, #FFD166, #FFDE8A);
+            border: 4px solid #FFC145;
+            color: #333;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .kid-friendly-button-accent:hover {
+            background: linear-gradient(135deg, #FFC145, #FFD675);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .option-button {
+            background: linear-gradient(135deg, #118AB2, #06D6A0);
+            border: 4px solid #0A7A9C;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .option-button:hover {
+            background: linear-gradient(135deg, #0A7A9C, #05C48F);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .option-button-selected {
+            background: linear-gradient(135deg, #8B5FBF, #A67FDB);
+            border: 4px solid #7A4FA8;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(139, 95, 191, 0.4);
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body class="mobile-optimized">
+    <div id="app"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function KidsInteractiveSurvey() {
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [answers, setAnswers] = useState({});
+            const [surveyComplete, setSurveyComplete] = useState(false);
+            const [savedSurveys, setSavedSurveys] = useState([]);
+            const [showResults, setShowResults] = useState(false);
+            const [isReading, setIsReading] = useState(false);
+            const [speechEnabled, setSpeechEnabled] = useState(true);
+            const [isListening, setIsListening] = useState(false);
+            const [recognition, setRecognition] = useState(null);
+            const [voiceAnswer, setVoiceAnswer] = useState('');
+            const [voiceError, setVoiceError] = useState('');
+            const [autoAdvance, setAutoAdvance] = useState(false);
+            const [isMobile, setIsMobile] = useState(false);
+            const [showPermissionHint, setShowPermissionHint] = useState(false);
+            const [hasMicrophoneAccess, setHasMicrophoneAccess] = useState(false);
+            const [selectedOption, setSelectedOption] = useState(null);
+            const [autoAdvanceTimer, setAutoAdvanceTimer] = useState(null);
+            const [voiceProcessed, setVoiceProcessed] = useState(false);
+            const [hasReadInitialQuestion, setHasReadInitialQuestion] = useState(false);
+            const [showAdultMessage, setShowAdultMessage] = useState(true);
+            const [adultMessageRead, setAdultMessageRead] = useState(false);
+
+            const survey = {
+                title: "Encuesta Educación Utopía 🏫",
+                questions: [
+                    { id: 1, text: "¿Cuántos años tienes?", type: "text", emoji: "🎂" },
+                    { id: 2, text: "¿Cuál es tu género?", type: "multiple", emoji: "👥", options: ["Masculino", "Femenino", "Otro", "Prefiero no decir"] },
+                    { id: 3, text: "¿Cuál es la escuela donde estás participando?", type: "text", emoji: "🏫" },
+                    { id: 4, text: "¿Cuál es tu rol en la comunidad escolar?", type: "multiple", emoji: "👨‍👩‍👧‍👦", options: ["Estudiante", "Padre/Madre de familia", "Docente", "Personal de la escuela", "Vecino/a de la comunidad", "Otro"] },
+                    { id: 5, text: "¿Cuánto tiempo haces en llegar a la escuela?", type: "multiple", emoji: "⏰", options: ["Menos de 15 minutos", "15 a 30 minutos", "30 a 45 minutos", "45 minutos a 1 hora", "Más de 1 hora"] },
+                    { id: 6, text: "¿Cómo te transportas para llegar a la escuela?", type: "multiple", emoji: "🚌", options: ["A pie", "Transporte público (Metro, Metrobús, RTP)", "Vehículo particular", "Bicicleta", "Motocicleta", "Otro"] },
+                    { id: 7, text: "¿Desde dónde te trasladas para llegar a la escuela los días sábados para las actividades del programa Educación Utopía?", type: "multiple", emoji: "📍", options: ["Desde mi casa", "Desde mi trabajo", "Desde otra escuela", "Desde otro lugar de la comunidad", "Otro"] },
+                    { id: 8, text: "¿Consideras fácil el acceso a las instalaciones de la escuela para la comunidad en general?", type: "yesno", emoji: "🚪" },
+                    { id: 9, text: "En cuestiones de seguridad alrededor de la escuela, ¿cómo la consideras?", type: "multiple", emoji: "🛡️", options: ["Muy segura", "Segura", "Poco segura", "Nada segura", "No sé"] },
+                    { id: 10, text: "¿Qué tipo de actividades consideras más atractivas para participar?", type: "multiple", emoji: "🎨", options: ["Deportivas", "Artísticas y culturales", "Tecnológicas", "Académicas", "Comunitarias", "Oficios y habilidades"] }
+                ]
+            };
+
+            // RESETEAR ENCUESTAS GUARDADAS AL INICIAR
+            useEffect(() => {
+                // Limpiar localStorage para empezar desde Persona 1
+                localStorage.removeItem('kidsSurveys');
+                setSavedSurveys([]);
+                
+                const checkMobile = () => {
+                    const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+                    setIsMobile(mobile);
+                    
+                    // Mostrar hint de permisos solo en móvil
+                    if (mobile && !hasMicrophoneAccess) {
+                        setShowPermissionHint(true);
+                    }
+                };
+                
+                checkMobile();
+                window.addEventListener('resize', checkMobile);
+                
+                return () => window.removeEventListener('resize', checkMobile);
+            }, [hasMicrophoneAccess]);
+
+            // Función para solicitar permisos de micrófono
+            const requestMicrophonePermission = async () => {
+                try {
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        throw new Error('El navegador no soporta acceso al micrófono');
+                    }
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
+                    
+                    // Cerramos el stream inmediatamente después de obtener permiso
+                    stream.getTracks().forEach(track => track.stop());
+                    setHasMicrophoneAccess(true);
+                    setShowPermissionHint(false);
+                    return true;
+                } catch (error) {
+                    console.error('Error al acceder al micrófono:', error);
+                    setHasMicrophoneAccess(false);
+                    
+                    if (error.name === 'NotAllowedError') {
+                        setVoiceError('Permiso de micrófono denegado. Por favor, permite el acceso al micrófono en la configuración de tu navegador.');
+                    } else if (error.name === 'NotFoundError') {
+                        setVoiceError('No se encontró ningún micrófono disponible.');
+                    } else {
+                        setVoiceError('No se pudo acceder al micrófono. Verifica los permisos de tu navegador.');
+                    }
+                    
+                    return false;
+                }
+            };
+
+            // Inicializar reconocimiento de voz
+            useEffect(() => {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    const recognitionInstance = new SpeechRecognition();
+                    
+                    recognitionInstance.continuous = false;
+                    recognitionInstance.interimResults = false;
+                    recognitionInstance.lang = 'es-ES';
+                    recognitionInstance.maxAlternatives = 3;
+                    
+                    recognitionInstance.onstart = () => {
+                        setIsListening(true);
+                        setVoiceError('');
+                        setVoiceAnswer('');
+                        setVoiceProcessed(false);
+                    };
+                    
+                    recognitionInstance.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        setVoiceAnswer(transcript);
+                        processVoiceAnswer(transcript);
+                    };
+                    
+                    recognitionInstance.onerror = (event) => {
+                        console.error('Error en reconocimiento de voz:', event.error);
+                        setIsListening(false);
+                        
+                        if (event.error === 'not-allowed') {
+                            setVoiceError('Permiso de micrófono denegado. Toca el botón "Permitir Micrófono" primero.');
+                            setShowPermissionHint(true);
+                        } else if (event.error === 'no-speech') {
+                            setVoiceError('No se detectó voz. Intenta de nuevo hablando más claro.');
+                        } else if (event.error === 'audio-capture') {
+                            setVoiceError('No se pudo acceder al micrófono. Verifica los permisos.');
+                        } else {
+                            setVoiceError('Error en el reconocimiento de voz. Intenta de nuevo.');
+                        }
+                    };
+                    
+                    recognitionInstance.onend = () => {
+                        setIsListening(false);
+                    };
+                    
+                    setRecognition(recognitionInstance);
+                } else {
+                    setVoiceError('Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.');
+                }
+            }, []);
+
+            const speakText = (text) => {
+                if (!speechEnabled) return;
+                
+                // Cancelar cualquier lectura previa
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES';
+                utterance.rate = 0.8;
+                utterance.pitch = 1.2;
+                utterance.volume = 0.8;
+                utterance.onstart = () => setIsReading(true);
+                utterance.onend = () => {
+                    setIsReading(false);
+                    setHasReadInitialQuestion(true);
+                    
+                    // Si es el mensaje para adultos, avanzar automáticamente después de leerlo
+                    if (showAdultMessage && !adultMessageRead) {
+                        setAdultMessageRead(true);
+                        // Pequeño delay antes de avanzar a la primera pregunta
+                        setTimeout(() => {
+                            setShowAdultMessage(false);
+                        }, 1000);
+                    }
+                };
+                utterance.onerror = () => {
+                    setIsReading(false);
+                    setHasReadInitialQuestion(true);
+                    
+                    // Si es el mensaje para adultos, avanzar incluso si hay error
+                    if (showAdultMessage && !adultMessageRead) {
+                        setAdultMessageRead(true);
+                        setTimeout(() => {
+                            setShowAdultMessage(false);
+                        }, 1000);
+                    }
+                };
+                window.speechSynthesis.speak(utterance);
+            };
+
+            const stopSpeaking = () => {
+                window.speechSynthesis.cancel();
+                setIsReading(false);
+            };
+
+            const toggleSpeech = () => {
+                setSpeechEnabled(!speechEnabled);
+                if (isReading) stopSpeaking();
+            };
+
+            // Mensaje inicial para adultos - se reproduce automáticamente
+            useEffect(() => {
+                if (showAdultMessage && speechEnabled && !adultMessageRead) {
+                    const message = "Persona adulta, la siguiente pregunta busca conocer el ambiente que rodea la escuela. Por favor, acerque al niño o niña a la bocina para que pueda escuchar la pregunta y responda con su voz.";
+                    
+                    // Pequeño delay para asegurar que todo esté listo
+                    const timer = setTimeout(() => {
+                        speakText(message);
+                    }, 500);
+                    
+                    return () => clearTimeout(timer);
+                }
+            }, [showAdultMessage, speechEnabled, adultMessageRead]);
+
+            // Leer solo cuando cambia la pregunta
+            useEffect(() => {
+                if (!showAdultMessage && speechEnabled && !surveyComplete && !showResults && !isReading && !hasReadInitialQuestion && !isListening && !voiceProcessed) {
+                    const question = survey.questions[currentQuestion];
+                    
+                    const timer = setTimeout(() => {
+                        if (!isListening && !voiceProcessed && !hasReadInitialQuestion) {
+                            let textToRead = question.text;
+                            
+                            if (question.type === 'multiple' && question.options) {
+                                textToRead += '. Las opciones son: ' + question.options.join(', ');
+                            } else if (question.type === 'yesno') {
+                                textToRead += '. Puedes responder sí o no.';
+                            }
+                            
+                            speakText(textToRead);
+                        }
+                    }, 300);
+                    
+                    return () => clearTimeout(timer);
+                }
+            }, [currentQuestion, showAdultMessage]);
+
+            const startListening = () => {
+                if (recognition) {
+                    setVoiceAnswer('');
+                    setVoiceError('');
+                    setVoiceProcessed(false);
+                    try {
+                        recognition.start();
+                    } catch (error) {
+                        console.error('Error al iniciar reconocimiento:', error);
+                        setVoiceError('Error al iniciar el micrófono. Intenta de nuevo.');
+                    }
+                }
+            };
+
+            const startListeningWithPermission = async () => {
+                if (isMobile && !hasMicrophoneAccess) {
+                    const hasPermission = await requestMicrophonePermission();
+                    if (hasPermission) {
+                        setTimeout(() => {
+                            startListening();
+                        }, 500);
+                    }
+                } else {
+                    startListening();
+                }
+            };
+
+            const stopListening = () => {
+                if (recognition) {
+                    try {
+                        recognition.stop();
+                    } catch (error) {
+                        console.error('Error al detener reconocimiento:', error);
+                    }
+                    setIsListening(false);
+                }
+            };
+
+            const processVoiceAnswer = (transcript) => {
+                const question = survey.questions[currentQuestion];
+                const normalizedTranscript = transcript.toLowerCase().trim();
+                
+                console.log('Procesando voz:', transcript, 'Normalizado:', normalizedTranscript);
+                
+                let answerProcessed = false;
+                let selectedOptionValue = null;
+                
+                switch (question.type) {
+                    case 'text':
+                        // GUARDAR DIRECTAMENTE LA RESPUESTA DE VOZ
+                        handleAnswer(question.id, transcript);
+                        setVoiceProcessed(true);
+                        setVoiceAnswer(transcript);
+                        answerProcessed = true;
+                        
+                        setTimeout(() => {
+                            speakText(`Respuesta guardada: ${transcript}`);
+                        }, 300);
+                        break;
+                        
+                    case 'multiple':
+                        // Búsqueda más flexible de opciones
+                        const matchedOption = question.options.find(option => {
+                            const normalizedOption = option.toLowerCase();
+                            return normalizedTranscript.includes(normalizedOption) ||
+                                   normalizedOption.includes(normalizedTranscript) ||
+                                   transcript.toLowerCase().includes(normalizedOption) ||
+                                   normalizedOption.includes(transcript.toLowerCase());
+                        });
+                        
+                        console.log('Opción encontrada:', matchedOption);
+                        
+                        if (matchedOption) {
+                            // GUARDAR DIRECTAMENTE LA RESPUESTA DE VOZ
+                            selectedOptionValue = matchedOption;
+                            handleAnswer(question.id, matchedOption);
+                            setSelectedOption(matchedOption);
+                            setVoiceProcessed(true);
+                            setVoiceAnswer(transcript);
+                            answerProcessed = true;
+                            
+                            setTimeout(() => {
+                                speakText(`Has seleccionado: ${matchedOption}`);
+                            }, 300);
+                        } else {
+                            // Búsqueda por palabras clave
+                            const keywordMatches = {
+                                'masculino': 'Masculino',
+                                'femenino': 'Femenino', 
+                                'otro': 'Otro',
+                                'prefiero no decir': 'Prefiero no decir',
+                                'no decir': 'Prefiero no decir',
+                                'hombre': 'Masculino',
+                                'mujer': 'Femenino',
+                                'chico': 'Masculino',
+                                'chica': 'Femenino',
+                                'niño': 'Masculino',
+                                'niña': 'Femenino'
+                            };
+                            
+                            const keywordMatch = Object.keys(keywordMatches).find(keyword => 
+                                normalizedTranscript.includes(keyword)
+                            );
+                            
+                            if (keywordMatch) {
+                                const matchedValue = keywordMatches[keywordMatch];
+                                // GUARDAR DIRECTAMENTE LA RESPUESTA DE VOZ
+                                selectedOptionValue = matchedValue;
+                                handleAnswer(question.id, matchedValue);
+                                setSelectedOption(matchedValue);
+                                setVoiceProcessed(true);
+                                setVoiceAnswer(transcript);
+                                answerProcessed = true;
+                                
+                                setTimeout(() => {
+                                    speakText(`Has seleccionado: ${matchedValue}`);
+                                }, 300);
+                            } else {
+                                setVoiceError(`No entendí tu respuesta. Las opciones son: ${question.options.join(', ')}`);
+                                setTimeout(() => {
+                                    speakText(`No entendí tu respuesta. Por favor elige una opción.`);
+                                }, 300);
+                            }
+                        }
+                        break;
+                        
+                    case 'yesno':
+                        if (normalizedTranscript.includes('sí') || normalizedTranscript.includes('si') || normalizedTranscript.includes('sip') || normalizedTranscript.includes('correcto') || normalizedTranscript.includes('afirmativo')) {
+                            // GUARDAR DIRECTAMENTE LA RESPUESTA DE VOZ
+                            selectedOptionValue = 'Sí';
+                            handleAnswer(question.id, 'Sí');
+                            setSelectedOption('Sí');
+                            setVoiceProcessed(true);
+                            setVoiceAnswer(transcript);
+                            answerProcessed = true;
+                            
+                            setTimeout(() => {
+                                speakText('Has respondido: Sí');
+                            }, 300);
+                        } else if (normalizedTranscript.includes('no') || normalizedTranscript.includes('nop') || normalizedTranscript.includes('incorrecto') || normalizedTranscript.includes('negativo')) {
+                            // GUARDAR DIRECTAMENTE LA RESPUESTA DE VOZ
+                            selectedOptionValue = 'No';
+                            handleAnswer(question.id, 'No');
+                            setSelectedOption('No');
+                            setVoiceProcessed(true);
+                            setVoiceAnswer(transcript);
+                            answerProcessed = true;
+                            
+                            setTimeout(() => {
+                                speakText('Has respondido: No');
+                            }, 300);
+                        } else {
+                            setVoiceError('No entendí tu respuesta. Por favor, di "sí" o "no".');
+                            setTimeout(() => {
+                                speakText('No entendí tu respuesta. Por favor, di "sí" o "no".');
+                            }, 300);
+                        }
+                        break;
+                }
+                
+                // Activar animación de avance automático si se procesó una respuesta
+                if (answerProcessed) {
+                    setAutoAdvance(true);
+                    setTimeout(() => setAutoAdvance(false), 2000);
+                }
+            };
+
+            const handleAnswer = (questionId, answer) => {
+                console.log('Guardando respuesta:', questionId, answer);
+                setAnswers(prev => ({ ...prev, [questionId]: answer }));
+            };
+
+            const nextQuestion = () => {
+                console.log('Avanzando a siguiente pregunta');
+                stopSpeaking();
+                stopListening();
+                
+                // Limpiar cualquier timer pendiente
+                if (autoAdvanceTimer) {
+                    clearTimeout(autoAdvanceTimer);
+                    setAutoAdvanceTimer(null);
+                }
+                
+                // Resetear todos los estados de voz juntos
+                setVoiceAnswer('');
+                setVoiceError('');
+                setSelectedOption(null);
+                setVoiceProcessed(false);
+                setHasReadInitialQuestion(false);
+                
+                if (currentQuestion < survey.questions.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                } else {
+                    completeSurvey();
+                }
+            };
+
+            const prevQuestion = () => {
+                stopSpeaking();
+                stopListening();
+                
+                // Limpiar cualquier timer pendiente
+                if (autoAdvanceTimer) {
+                    clearTimeout(autoAdvanceTimer);
+                    setAutoAdvanceTimer(null);
+                }
+                
+                // Resetear todos los estados de voz
+                setVoiceAnswer('');
+                setVoiceError('');
+                setSelectedOption(null);
+                setVoiceProcessed(false);
+                setHasReadInitialQuestion(false);
+                
+                if (currentQuestion > 0) {
+                    setCurrentQuestion(currentQuestion - 1);
+                }
+            };
+
+            const completeSurvey = () => {
+                const surveyNumber = savedSurveys.length + 1;
+                const surveyData = {
+                    id: Date.now(),
+                    name: `Persona ${surveyNumber}`,
+                    date: new Date().toLocaleDateString(),
+                    answers: answers,
+                    totalQuestions: survey.questions.length
+                };
+                const updatedSurveys = [...savedSurveys, surveyData];
+                setSavedSurveys(updatedSurveys);
+                localStorage.setItem('kidsSurveys', JSON.stringify(updatedSurveys));
+                setSurveyComplete(true);
+            };
+
+            const exportToExcel = () => {
+                if (savedSurveys.length === 0) {
+                    alert('No hay respuestas para exportar');
+                    return;
+                }
+
+                const excelData = [];
+                
+                const headers = ['ID', 'Fecha', 'Persona'];  // CAMBIADO: "Nombre/Edad" → "Persona"
+                survey.questions.forEach(q => {
+                    headers.push(q.text);
+                });
+                excelData.push(headers);
+
+                savedSurveys.forEach(surveyData => {
+                    const row = [
+                        surveyData.id,
+                        surveyData.date,
+                        surveyData.name  // Esto ahora será "Persona 1", "Persona 2", etc.
+                    ];
+                    
+                    survey.questions.forEach(q => {
+                        row.push(surveyData.answers[q.id] || '');
+                    });
+                    
+                    excelData.push(row);
+                });
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
+                
+                const colWidths = headers.map((header, idx) => {
+                    if (idx === 0) return { wch: 15 };
+                    if (idx === 1) return { wch: 12 };
+                    if (idx === 2) return { wch: 15 };
+                    return { wch: 30 };
+                });
+                ws['!cols'] = colWidths;
+                
+                XLSX.utils.book_append_sheet(wb, ws, 'Encuestas');
+                
+                const timestamp = new Date().toISOString().split('T')[0];
+                XLSX.writeFile(wb, `Encuesta_Educacion_Utopia_${timestamp}.xlsx`);
+            };
+
+            const restartSurvey = () => {
+                stopSpeaking();
+                stopListening();
+                setCurrentQuestion(0);
+                setAnswers({});
+                setSurveyComplete(false);
+                setShowResults(false);
+                setVoiceAnswer('');
+                setVoiceError('');
+                setHasMicrophoneAccess(false);
+                setShowPermissionHint(isMobile);
+                setSelectedOption(null);
+                setVoiceProcessed(false);
+                setHasReadInitialQuestion(false);
+                setShowAdultMessage(true);
+                setAdultMessageRead(false);
+                
+                // Limpiar cualquier timer pendiente
+                if (autoAdvanceTimer) {
+                    clearTimeout(autoAdvanceTimer);
+                    setAutoAdvanceTimer(null);
+                }
+            };
+
+            const renderQuestion = () => {
+                const question = survey.questions[currentQuestion];
+                const currentAnswer = answers[question.id];
+
+                switch (question.type) {
+                    case 'text':
+                        return (
+                            <div className="space-y-4">
+                                {voiceProcessed && (
+                                    <div className="auto-advance-notice p-3 rounded-lg mb-2 text-center">
+                                        <p className="text-green-700 font-medium text-sm">
+                                            ✅ Respuesta guardada: "{voiceAnswer}"
+                                        </p>
+                                    </div>
+                                )}
+                                <textarea
+                                    value={currentAnswer || ''}
+                                    onChange={(e) => handleAnswer(question.id, e.target.value)}
+                                    placeholder="Escribe tu respuesta aquí o usa el micrófono..."
+                                    className="w-full p-4 text-lg border-4 border-utopia-primary rounded-xl focus:border-utopia-accent focus:outline-none resize-none text-input-mobile"
+                                    rows={isMobile ? "2" : "3"}
+                                />
+                                <div className="text-center space-y-2">
+                                    {showPermissionHint && (
+                                        <div className="permission-warning p-3 rounded-lg mb-2">
+                                            <p className="text-amber-800 font-medium text-sm">
+                                                🔒 Para usar el micrófono, primero debes permitir el acceso
+                                            </p>
+                                            <button
+                                                onClick={requestMicrophonePermission}
+                                                className="mt-2 kid-friendly-button px-4 py-2 rounded-full font-medium transition-colors text-sm"
+                                            >
+                                                🎤 Permitir Micrófono
+                                            </button>
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={startListeningWithPermission}
+                                        disabled={isListening}
+                                        className={`px-6 py-3 rounded-full font-medium text-white transition-all transform hover:scale-105 mobile-button mobile-voice-btn ${
+                                            isListening 
+                                            ? 'voice-recording' 
+                                            : hasMicrophoneAccess ? 'kid-friendly-button' : 'bg-gray-400 hover:bg-gray-500'
+                                        }`}
+                                    >
+                                        {isListening ? '🛑 Grabando...' : hasMicrophoneAccess ? '🎤 Responder con voz' : '🎤 Solicitar Micrófono'}
+                                    </button>
+                                    {voiceAnswer && (
+                                        <div className={`p-3 rounded-lg text-center ${voiceProcessed ? 'voice-answer-processed' : 'bg-blue-100'}`}>
+                                            <p className="text-green-600 font-medium text-sm speech-feedback">
+                                                ✅ Reconocido: "{voiceAnswer}"
+                                            </p>
+                                            {voiceProcessed && (
+                                                <p className="text-blue-600 text-xs mt-1">
+                                                    ✅ Respuesta guardada correctamente
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+
+                    case 'multiple':
+                        return (
+                            <div className="space-y-4">
+                                {voiceProcessed && (
+                                    <div className="auto-advance-notice p-3 rounded-lg mb-2 text-center">
+                                        <p className="text-green-700 font-medium text-sm">
+                                            ✅ Respuesta guardada: "{selectedOption}"
+                                        </p>
+                                    </div>
+                                )}
+                                <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-4'} mobile-grid`}>
+                                    {question.options.map((option, index) => {
+                                        const isSelected = currentAnswer === option;
+                                        const isVoiceSelected = selectedOption === option;
+                                        
+                                        return (
+                                            <button
+                                                key={index}
+                                                onClick={() => {
+                                                    handleAnswer(question.id, option);
+                                                    setSelectedOption(option);
+                                                }}
+                                                onTouchStart={() => { if (speechEnabled && !isReading && isMobile) speakText(option); }}
+                                                onMouseEnter={() => { if (speechEnabled && !isReading && !isMobile) speakText(option); }}
+                                                className={`p-4 rounded-xl font-medium text-lg transition-all transform hover:scale-105 mobile-button ${
+                                                    isSelected || isVoiceSelected
+                                                        ? 'option-button-selected'
+                                                        : 'option-button'
+                                                }`}
+                                            >
+                                                {option}
+                                                {(isSelected || isVoiceSelected) && (
+                                                    <span className="ml-2 animate-pulse">🎤</span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                <div className="text-center space-y-2">
+                                    {showPermissionHint && (
+                                        <div className="permission-warning p-3 rounded-lg mb-2">
+                                            <p className="text-amber-800 font-medium text-sm">
+                                                🔒 Para usar el micrófono, primero debes permitir el acceso
+                                            </p>
+                                            <button
+                                                onClick={requestMicrophonePermission}
+                                                className="mt-2 kid-friendly-button px-4 py-2 rounded-full font-medium transition-colors text-sm"
+                                            >
+                                                🎤 Permitir Micrófono
+                                            </button>
+                                        </div>
+                                    )}
+                                    <div className={`flex justify-center gap-2 ${isMobile ? 'mobile-voice-container' : ''}`}>
+                                        <button
+                                            onClick={startListeningWithPermission}
+                                            disabled={isListening}
+                                            className={`px-6 py-3 rounded-full font-medium text-white transition-all transform hover:scale-105 mobile-button mobile-voice-btn ${
+                                                isListening 
+                                                ? 'voice-recording' 
+                                                : hasMicrophoneAccess ? 'kid-friendly-button' : 'bg-gray-400 hover:bg-gray-500'
+                                            }`}
+                                        >
+                                            {isListening ? '🛑 Grabando...' : hasMicrophoneAccess ? '🎤 Responder con voz' : '🎤 Solicitar Micrófono'}
+                                        </button>
+                                        {speechEnabled && (
+                                            <button
+                                                onClick={() => speakText('Las opciones son: ' + question.options.join(', '))}
+                                                disabled={isReading}
+                                                className="kid-friendly-button-accent px-4 py-3 rounded-full font-medium transition-all transform hover:scale-105 mobile-button"
+                                            >
+                                                🔊 Repetir opciones
+                                            </button>
+                                        )}
+                                    </div>
+                                    {voiceAnswer && (
+                                        <div className={`p-3 rounded-lg text-center ${voiceProcessed ? 'voice-answer-processed' : 'bg-blue-100'}`}>
+                                            <p className="text-green-600 font-medium text-sm speech-feedback">
+                                                ✅ Reconocido: "{voiceAnswer}"
+                                            </p>
+                                            {voiceProcessed && selectedOption && (
+                                                <p className="text-blue-600 text-xs mt-1">
+                                                    ✅ Seleccionado: "{selectedOption}"
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+                                    {currentAnswer && !voiceProcessed && (
+                                        <p className="text-utopia-primary font-medium text-sm">
+                                            🎯 Seleccionado: "{currentAnswer}"
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        );
+
+                    case 'yesno':
+                        return (
+                            <div className="space-y-6">
+                                {voiceProcessed && (
+                                    <div className="auto-advance-notice p-3 rounded-lg mb-2 text-center">
+                                        <p className="text-green-700 font-medium text-sm">
+                                            ✅ Respuesta guardada: "{selectedOption}"
+                                        </p>
+                                    </div>
+                                )}
+                                <div className={`flex ${isMobile ? 'flex-col space-y-4' : 'space-x-6'} justify-center`}>
+                                    <button
+                                        onClick={() => {
+                                            handleAnswer(question.id, 'Sí');
+                                            setSelectedOption('Sí');
+                                        }}
+                                        className={`px-8 py-4 rounded-full font-bold text-xl transition-all transform hover:scale-110 mobile-button ${
+                                            currentAnswer === 'Sí' || selectedOption === 'Sí'
+                                                ? 'option-button-selected'
+                                                : 'kid-friendly-button'
+                                        }`}
+                                    >
+                                        ✅ ¡Sí!
+                                        {(currentAnswer === 'Sí' || selectedOption === 'Sí') && (
+                                            <span className="ml-2 animate-pulse">🎤</span>
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            handleAnswer(question.id, 'No');
+                                            setSelectedOption('No');
+                                        }}
+                                        className={`px-8 py-4 rounded-full font-bold text-xl transition-all transform hover:scale-110 mobile-button ${
+                                            currentAnswer === 'No' || selectedOption === 'No'
+                                                ? 'option-button-selected'
+                                                : 'kid-friendly-button-secondary'
+                                        }`}
+                                    >
+                                        ❌ No
+                                        {(currentAnswer === 'No' || selectedOption === 'No') && (
+                                            <span className="ml-2 animate-pulse">🎤</span>
+                                        )}
+                                    </button>
+                                </div>
+                                <div className="text-center space-y-2">
+                                    {showPermissionHint && (
+                                        <div className="permission-warning p-3 rounded-lg mb-2">
+                                            <p className="text-amber-800 font-medium text-sm">
+                                                🔒 Para usar el micrófono, primero debes permitir el acceso
+                                            </p>
+                                            <button
+                                                onClick={requestMicrophonePermission}
+                                                className="mt-2 kid-friendly-button px-4 py-2 rounded-full font-medium transition-colors text-sm"
+                                            >
+                                                🎤 Permitir Micrófono
+                                            </button>
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={startListeningWithPermission}
+                                        disabled={isListening}
+                                        className={`px-6 py-3 rounded-full font-medium text-white transition-all transform hover:scale-105 mobile-button mobile-voice-btn ${
+                                            isListening 
+                                            ? 'voice-recording' 
+                                            : hasMicrophoneAccess ? 'kid-friendly-button' : 'bg-gray-400 hover:bg-gray-500'
+                                        }`}
+                                    >
+                                        {isListening ? '🛑 Grabando...' : hasMicrophoneAccess ? '🎤 Responder con voz' : '🎤 Solicitar Micrófono'}
+                                    </button>
+                                    {voiceAnswer && (
+                                        <div className={`p-3 rounded-lg text-center ${voiceProcessed ? 'voice-answer-processed' : 'bg-blue-100'}`}>
+                                            <p className="text-green-600 font-medium text-sm speech-feedback">
+                                                ✅ Reconocido: "{voiceAnswer}"
+                                            </p>
+                                            {voiceProcessed && selectedOption && (
+                                                <p className="text-blue-600 text-xs mt-1">
+                                                    ✅ Seleccionado: "{selectedOption}"
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+                                    {currentAnswer && !voiceProcessed && (
+                                        <p className="text-utopia-primary font-medium text-sm">
+                                            🎯 Seleccionado: "{currentAnswer}"
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        );
+
+                    default:
+                        return null;
+                }
+            };
+
+            if (showAdultMessage) {
+                return (
+                    <div className="min-h-screen bg-utopia-gradient p-4 mobile-padding flex items-center justify-center">
+                        <div className="bg-white rounded-3xl shadow-2xl p-6 mobile-padding max-w-2xl mx-auto text-center w-full">
+                            <div className="text-4xl md:text-6xl mb-4">👨‍👩‍👧‍👦</div>
+                            <h1 className="text-2xl md:text-4xl font-bold text-utopia-primary mb-4 mobile-text">Encuesta Educación Utopía</h1>
+                            <div className="bg-gradient-to-r from-utopia-accent to-utopia-light p-4 md:p-6 rounded-2xl mb-6">
+                                <p className="text-base md:text-lg font-medium text-gray-800">
+                                    Persona adulta, esta encuesta busca conocer el ambiente que rodea la escuela.
+                                </p>
+                                <p className="text-gray-700 text-sm md:text-base mt-2">
+                                    Por favor, acerque al niño o niña a la bocina para que pueda escuchar cada pregunta y responda con su voz.
+                                </p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-utopia-primary font-medium mb-4 animate-pulse">
+                                    🔊 Escuchando instrucciones...
+                                </p>
+                                <button 
+                                    onClick={() => {
+                                        setShowAdultMessage(false);
+                                        setAdultMessageRead(true);
+                                    }}
+                                    className="kid-friendly-button text-white px-6 py-3 rounded-full font-medium transition-colors mobile-button text-lg"
+                                >
+                                    Saltar y comenzar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (showResults) {
+                return (
+                    <div className="min-h-screen bg-utopia-gradient p-4 mobile-padding">
+                        <div className="max-w-4xl mx-auto">
+                            <div className="bg-white rounded-3xl shadow-2xl p-6 mobile-padding">
+                                <div className="text-center mb-6">
+                                    <h1 className="text-3xl md:text-4xl font-bold text-utopia-primary mb-4 mobile-text">📊 Respuestas Guardadas</h1>
+                                    <button
+                                        onClick={exportToExcel}
+                                        className="kid-friendly-button-secondary text-white px-6 py-3 rounded-full font-medium transition-colors mobile-button mb-4"
+                                    >
+                                        📥 Exportar a Excel
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    {savedSurveys.map((surveyData) => (
+                                        <div key={surveyData.id} className="bg-gradient-to-r from-utopia-accent to-blue-50 p-4 rounded-2xl border-2 border-utopia-primary">
+                                            <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4 space-y-2 md:space-y-0">
+                                                <div>
+                                                    <h3 className="text-lg md:text-xl font-bold text-gray-800">👤 {surveyData.name}</h3>
+                                                    <p className="text-gray-600 text-sm">📅 {surveyData.date}</p>
+                                                    <p className="text-utopia-primary text-sm font-medium">🎂 Edad: {surveyData.answers[1] || 'No especificada'}</p>
+                                                </div>
+                                                <div className="bg-utopia-primary px-3 py-1 rounded-full self-start">
+                                                    <span className="text-white font-medium text-sm">✅ {surveyData.totalQuestions} preguntas</span>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 gap-3">
+                                                {Object.entries(surveyData.answers).map(([questionId, answer]) => {
+                                                    const question = survey.questions.find(q => q.id === parseInt(questionId));
+                                                    if (!question) return null;
+                                                    return (
+                                                        <div key={questionId} className="bg-white p-3 rounded-lg">
+                                                            <p className="font-medium text-gray-700 text-xs mb-1">{question.emoji} {question.text}</p>
+                                                            <p className="text-gray-600 text-sm">{answer}</p>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                {savedSurveys.length === 0 && (
+                                    <div className="text-center py-8">
+                                        <div className="text-4xl md:text-6xl mb-4">📋</div>
+                                        <p className="text-gray-500 text-base md:text-lg">¡Aún no hay respuestas guardadas!</p>
+                                    </div>
+                                )}
+                                <div className="flex justify-center mt-6">
+                                    <button onClick={restartSurvey} className="kid-friendly-button text-white px-6 py-3 rounded-full font-medium transition-colors mobile-button">
+                                        🔄 Nueva encuesta
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (surveyComplete) {
+                return (
+                    <div className="min-h-screen bg-utopia-gradient p-4 mobile-padding flex items-center justify-center">
+                        <div className="bg-white rounded-3xl shadow-2xl p-6 mobile-padding max-w-2xl mx-auto text-center w-full">
+                            <div className="text-4xl md:text-6xl mb-4">🎉</div>
+                            <h1 className="text-2xl md:text-4xl font-bold text-utopia-primary mb-4 mobile-text">¡Felicidades!</h1>
+                            <p className="text-lg md:text-xl text-gray-700 mb-6">¡Has completado toda la encuesta! Tus respuestas han sido guardadas.</p>
+                            <div className="bg-gradient-to-r from-utopia-accent to-utopia-light p-4 md:p-6 rounded-2xl mb-6">
+                                <div className="text-4xl md:text-6xl mb-4">🏆</div>
+                                <p className="text-base md:text-lg font-medium text-gray-800">Respondiste {survey.questions.length} preguntas</p>
+                                <p className="text-gray-600 text-sm md:text-base">¡Eres increíble! 🌟</p>
+                            </div>
+                            <div className="flex flex-col space-y-3 justify-center">
+                                <button onClick={restartSurvey} className="kid-friendly-button text-white px-6 py-3 rounded-full font-medium transition-colors mobile-button">
+                                    🔄 Hacer otra encuesta
+                                </button>
+                                <button onClick={() => setShowResults(true)} className="kid-friendly-button-secondary text-white px-6 py-3 rounded-full font-medium transition-colors mobile-button">
+                                    🏆 Ver todas las respuestas
+                                </button>
+                                <button onClick={exportToExcel} className="kid-friendly-button-accent text-gray-800 px-6 py-3 rounded-full font-medium transition-colors mobile-button">
+                                    📥 Exportar a Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            const question = survey.questions[currentQuestion];
+            const progress = ((currentQuestion + 1) / survey.questions.length) * 100;
+            const hasAnswer = answers[question.id] !== undefined && answers[question.id] !== '';
+
+            return (
+                <div className="min-h-screen bg-utopia-gradient p-4 mobile-padding">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="text-center mb-6">
+                            <h1 className="text-2xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg mobile-text">{survey.title}</h1>
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-white rounded-full p-2 flex flex-wrap justify-center gap-2">
+                                    <button
+                                        onClick={toggleSpeech}
+                                        className={`p-2 rounded-full transition-colors ${speechEnabled ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}`}
+                                        title={speechEnabled ? 'Audio activado' : 'Audio desactivado'}
+                                    >
+                                        {speechEnabled ? '🔊' : '🔇'}
+                                    </button>
+                                    {speechEnabled && (
+                                        <button
+                                            onClick={() => {
+                                                let textToRead = question.text;
+                                                if (question.type === 'multiple' && question.options) {
+                                                    textToRead += '. Las opciones son: ' + question.options.join(', ');
+                                                } else if (question.type === 'yesno') {
+                                                    textToRead += '. Puedes responder sí o no.';
+                                                }
+                                                speakText(textToRead);
+                                            }}
+                                            disabled={isReading}
+                                            className={`px-3 py-2 rounded-full font-medium transition-colors text-sm mobile-button ${isReading ? 'bg-blue-100 text-blue-600' : 'kid-friendly-button text-white hover:bg-purple-700'}`}
+                                        >
+                                            {isReading ? '🔊 Leyendo...' : '🔊 Leer pregunta'}
+                                        </button>
+                                    )}
+                                    {isReading && (
+                                        <button onClick={stopSpeaking} className="px-3 py-2 rounded-full kid-friendly-button-secondary text-white hover:bg-red-600 font-medium transition-colors text-sm mobile-button">
+                                            ⏹️ Parar
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-full p-2 max-w-md mx-auto">
+                                <div className="bg-gradient-to-r from-utopia-primary to-utopia-secondary h-3 md:h-4 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
+                            </div>
+                            <p className="text-white mt-2 font-medium text-sm md:text-base">Pregunta {currentQuestion + 1} de {survey.questions.length}</p>
+                        </div>
+                        <div className="bg-white rounded-3xl shadow-2xl p-6 mobile-padding mb-6">
+                            <div className="text-center mb-6">
+                                <div className="text-4xl md:text-6xl mb-4">{question.emoji}</div>
+                                <h2 className="text-xl md:text-3xl font-bold text-gray-800 mb-6 mobile-text">{question.text}</h2>
+                            </div>
+                            {renderQuestion()}
+                            {voiceError && (
+                                <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-center text-sm">
+                                    ❌ {voiceError}
+                                </div>
+                            )}
+                        </div>
+                        <div className={`flex justify-between items-center p-4 rounded-xl transition-all ${autoAdvance ? 'auto-advance' : ''}`}>
+                            <button
+                                onClick={prevQuestion}
+                                disabled={currentQuestion === 0}
+                                className="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-medium transition-colors mobile-button text-sm md:text-base"
+                            >
+                                ← Anterior
+                            </button>
+                            <div className="flex items-center space-x-1 md:space-x-2">
+                                <span className="text-xl md:text-2xl">❤️</span>
+                                <span className="text-xl md:text-2xl">😊</span>
+                                <span className="text-xl md:text-2xl">⭐</span>
+                            </div>
+                            <button
+                                onClick={nextQuestion}
+                                disabled={!hasAnswer && !voiceProcessed}
+                                className="kid-friendly-button hover:scale-105 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-medium transition-all transform mobile-button text-sm md:text-base"
+                            >
+                                {currentQuestion === survey.questions.length - 1 ? '¡Terminar!' : 'Siguiente'} →
+                            </button>
+                        </div>
+                        {savedSurveys.length > 0 && (
+                            <div className="text-center mt-4">
+                                <button
+                                    onClick={() => setShowResults(true)}
+                                    className="kid-friendly-button-accent text-gray-800 px-4 md:px-6 py-2 rounded-full font-medium transition-colors mobile-button text-sm"
+                                >
+                                    📊 Ver respuestas ({savedSurveys.length})
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<KidsInteractiveSurvey />, document.getElementById('app'));
+    </script>
+</body>
+</html>
